@@ -2,6 +2,8 @@
 
 This will import Lithtech DTX files and allow Godot to read them as textures. 
 
+Note: This fork is meant to be used on Godot 4.0 (beta 2), for Godot 3.x see [here](https://github.com/haekb/godot-dtx-reader "here.")
+
 ## Supported Formats
 
 This plugin currently supports DTX versions:
