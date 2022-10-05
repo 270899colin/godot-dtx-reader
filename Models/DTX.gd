@@ -70,7 +70,7 @@ class DTX:
 	
 	enum IMPORT_RETURN{SUCCESS, ERROR}
 	
-	func read(f : File):
+	func read(f : FileAccess):
 		self.image = null
 		
 		self.resource_type = f.get_32()
@@ -119,7 +119,7 @@ class DTX:
 		
 	# End Func
 	
-	func read_texture_data(f : File):
+	func read_texture_data(f : FileAccess):
 		var image = null
 		
 		# Version check must come before everything else!!
@@ -138,7 +138,7 @@ class DTX:
 	# Read in a DXT compressed texture
 	# Godot does the heavy lifting here!
 	#
-	func read_compressed(f : File):
+	func read_compressed(f : FileAccess):
 		var image = Image.new()
 		
 		# DXT1 - Defaults
@@ -161,7 +161,7 @@ class DTX:
 		
 		return image
 		
-	func read_32bit_texture(f : File):
+	func read_32bit_texture(f : FileAccess):
 		var image = Image.new()
 		var data = f.get_buffer(self.width * self.height * 4)
 		image.create_from_data(self.width, self.height, false, Image.FORMAT_RGBA8, data)
@@ -172,12 +172,12 @@ class DTX:
 	# Read in a 32-bit palettized texture
 	# I've only seen these used with the PS2 version of NOLF
 	# 
-	func read_32bit_palette(f : File):
+	func read_32bit_palette(f : FileAccess):
 		var image = Image.new()
 		var palette = []
 		
 		var data = f.get_buffer(self.width * self.height * 1)
-		var colour_data = PoolByteArray()
+		var colour_data = PackedByteArray()
 		
 		# TODO: Actually use this
 		# We need to skip past the mipmaps!
@@ -211,8 +211,8 @@ class DTX:
 			var g = unpacked_data.y
 			var b = unpacked_data.z
 
-			# Quat so we can use 0-255, stupid Color...
-			palette.append( Quat(r, g, b, a) )
+			# Quaternion so we can use 0-255, stupid Color...
+			palette.append( Quaternion(r, g, b, a) )
 		# End For
 
 		var i = 0
@@ -233,7 +233,7 @@ class DTX:
 	# Read in a 8-bit palettized texture
 	# Basically for Lithtech 1.0 games.
 	#
-	func read_8bit_palette(f : File):
+	func read_8bit_palette(f : FileAccess):
 		var image = Image.new()
 		var palette = []
 		
@@ -249,12 +249,12 @@ class DTX:
 			var g = f.get_8()
 			var b = f.get_8()
 
-			# Quat so we can use 0-255, stupid Color...
-			palette.append( Quat(r, g, b, a) )
+			# Quaternion so we can use 0-255, stupid Color...
+			palette.append( Quaternion(r, g, b, a) )
 		# End For
 	
 		var data = f.get_buffer(self.width * self.height * 1)
-		var colour_data = PoolByteArray()
+		var colour_data = PackedByteArray()
 		
 		var i = 0
 		
@@ -285,10 +285,10 @@ class DTX:
 		var g = (value & 0x0000ff00) >>  8
 		var b = (value & 0x000000ff)
 
-		return Quat(r, g, b, a)
+		return Quaternion(r, g, b, a)
 	# End Func
 	
-	func read_string(file : File, is_length_a_short = true):
+	func read_string(file : FileAccess, is_length_a_short = true):
 		var length = 0
 		if is_length_a_short:
 			length = file.get_16() 
@@ -299,14 +299,14 @@ class DTX:
 		return file.get_buffer(length).get_string_from_ascii()
 	# End Func
 	
-	func read_vector2(file : File):
+	func read_vector2(file : FileAccess):
 		var vec2 = Vector2()
 		vec2.x = file.get_float()
 		vec2.y = file.get_float()
 		return vec2
 	# End Func
 		
-	func read_vector3(file : File):
+	func read_vector3(file : FileAccess):
 		var vec3 = Vector3()
 		vec3.x = file.get_float()
 		vec3.y = file.get_float()
@@ -314,15 +314,15 @@ class DTX:
 		return vec3
 	# End Func
 	
-	func read_quat(file : File):
-		var quat = Quat()
+	func read_quat(file : FileAccess):
+		var quat = Quaternion()
 		quat.w = file.get_float()
 		quat.x = file.get_float()
 		quat.y = file.get_float()
 		quat.z = file.get_float()
 		return quat
 		
-	func read_matrix(file : File):
+	func read_matrix(file : FileAccess):
 		var matrix_4x4 = []
 		for _i in range(16):
 			matrix_4x4.append(file.get_float())
@@ -331,7 +331,7 @@ class DTX:
 	# End Func
 	
 	func convert_4x4_to_transform(matrix):
-		return Transform(
+		return Transform3D(
 			Vector3( matrix[0], matrix[4], matrix[8]  ),
 			Vector3( matrix[1], matrix[5], matrix[9]  ),
 			Vector3( matrix[2], matrix[6], matrix[10] ),
